@@ -28,13 +28,13 @@ $(document).ready(function(){
                 { data: "content", orderable: false },
                 { data: "author", orderable: false },
                 {
-                    data: 'network_id',
+                    data: 'id',
                     width: "12%",
                     orderable: false,
                     render: function ( data, type, full, meta ) {
                         var button = [];
-                        button.push('<button onclick="updNetwork('+data+')" type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="fa fa-pencil"></i></button>');
-                        button.push('<button onclick="delNetwork('+data+')" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"><i class="fa fa-trash"></i></button>');
+                        button.push('<button onclick="upd('+data+')" type="button" class="btn btn-info btn-outline btn-circle btn-sm m-r-5"><i class="fa fa-pencil"></i></button>');
+                        button.push('<button onclick="del('+data+')" type="button" class="btn btn-danger btn-outline btn-circle btn-sm m-r-5"><i class="fa fa-trash"></i></button>');
 
                         return button.join('');
                     }
@@ -54,15 +54,13 @@ function add(){
     });
 }
 
-function updNetwork(id){
-    $('.preloader').fadeIn();
+function upd(id){
     $.ajax({
         method: "POST",
-        url: document.app.site_url+'/network/get/byid/'+id
+        url: document.app.site_url+'article/getbyid/'+id
     })
     .done(function( response ) {
-        $('.preloader').fadeOut();
-        formPopulate('#articleForm', response)
+        formPopulate('#articleForm', response.data)
     });
 
     $('#articleModal').modal({
@@ -74,14 +72,12 @@ function updNetwork(id){
 $('#btnSaveArticle').click(function(e){
     var data = serialzeForm('#articleForm');
 
-    $('.preloader').fadeIn();
     $.ajax({
         method: "POST",
         url: document.app.site_url+'article/save',
         data: data
     })
     .done(function( response ) {
-        $('.preloader').fadeOut();
 
         console.log(response);
 
@@ -100,7 +96,7 @@ $('#btnSaveArticle').click(function(e){
     });
 })
 
-function delNetwork(id){
+function del(id){
     swal({
         title: "Apakah Anda yakin?",
         text: "Anda akan menghapus artikel ini!",
@@ -110,8 +106,21 @@ function delNetwork(id){
     })
     .then((willDelete) => {
         if (willDelete) {
-            swal("Wuu! Artkel telah dihapus!", {
-                icon: "success",
+            $.ajax({
+                method: "POST",
+                url: document.app.site_url+'article/del/'+id
+            })
+            .done(function( response ) {
+                if(!response.status) {
+                    swal("Wuu! "+response.message, {
+                        icon: "warning",
+                    });
+                } else {
+                    articleTable.ajax.reload()
+                    swal("Wuu! "+response.message, {
+                        icon: "success",
+                    });
+                }
             });
         }
     });

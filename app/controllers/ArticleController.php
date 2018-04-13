@@ -85,8 +85,42 @@ class ArticleController extends Controller
         }
     }
 
-    function getByIdAction()
+    function delAction($id)
     {
+        $id = (int) $id;
+        $article_model = new Articles();
+        $row = $article_model->findFirst($id);
+
+        if ($row !== false) {
+            if ($row->delete() === false) {
+                $messages = $article_model->getMessages();
+                $resp_msg = [];
+                foreach ($messages as $message) {
+                    $resp_msg[] = $message->getMessage();
+                }
+                $this->_response_json([
+                    'status' => 0,
+                    'message' => 'Data gagal dihapus, '.implode(', ', $resp_msg)
+                ]);
+            } else {
+                $this->_response_json([
+                    'status' => 1,
+                    'message' => 'Data berhasil dihapus'
+                ]);
+            }
+        } else {
+            $this->_response_json([
+                'status' => 0,
+                'message' => 'Data tidak ada'
+            ]);
+        }
+
+
+    }
+
+    function getbyidAction($id)
+    {
+        $id = (int) $id;
         $article_model = new Articles();
         $row = $article_model->findFirst($id);
 
